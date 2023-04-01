@@ -5,14 +5,19 @@ import { io } from "socket.io-client";
 
 const ioMiddleware: Middleware = (store: any) => {
   const socket = io("ws://localhost:3000").connect();
+  const username = localStorage.getItem('username');
+
+  socket.on(SocketEvent.GAME_STATE, (gameState) => {
+    const currentPlayer = gameState.players?.find((player: any) => player.username === username);
+    const currentRound = gameState.rounds?.[gameState.rounds.length - 1];
+    const currentPlayerGuesses = currentRound?.playerGuesses
+      .find((playerGuess: any) => playerGuess.username === username);
+
+
+    store.dispatch(setState({ ...gameState, currentPlayer, currentPlayerGuesses, currentRound }));
+  });
 
   return (next: any) => (action: AnyAction) => {
-    const username = localStorage.getItem('username');
-
-    socket.on(SocketEvent.CONNECTION, () => {
-      console.log('SOCKET.IO connected')
-    });
-
     if (action.type === 'createRoom') {
       socket.emit(
         SocketEvent.CREATE_ROOM,
@@ -32,9 +37,17 @@ const ioMiddleware: Middleware = (store: any) => {
       socket.emit(SocketEvent.JOIN_ROOM, action.payload, username);
     }
 
-    socket.on(SocketEvent.GAME_STATE, (gameState) => {
-      store.dispatch(setState(gameState))
-    });
+    if (action.type === 'markReady') {
+      socket.emit(SocketEvent.MARK_READY);
+    }
+
+    if (action.type === 'startGame') {
+      socket.emit(SocketEvent.GAME_START);
+    }
+
+    if (action.type === 'makeGuess') {
+      socket.emit(SocketEvent.MAKE_GUESS, action.payload);
+    }
 
     next(action);
   }

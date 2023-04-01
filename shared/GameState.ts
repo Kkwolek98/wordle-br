@@ -1,5 +1,6 @@
 export enum GameState {
   WAITING,
   READY,
-  ONGOING
+  ONGOING,
+  OVER
 }

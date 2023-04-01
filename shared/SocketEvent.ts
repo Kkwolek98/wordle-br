@@ -3,5 +3,7 @@ export enum SocketEvent {
   JOIN_ROOM = 'join-room',
   CREATE_ROOM = 'create-room',
   GAME_STATE = 'game-state',
-  MARK_READY = 'mark-ready'
+  MARK_READY = 'mark-ready',
+  GAME_START = 'game-start',
+  MAKE_GUESS = 'make-guess'
 }
